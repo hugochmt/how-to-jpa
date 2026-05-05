@@ -166,7 +166,7 @@ Long countAllByStatusInAndPatientReimbursementReimbursementTypeInAndInvoiceNumbe
 
 ```java
 // JPQL - recommandé (indépendant de la BDD)
-@Query("SELECT u FROM User u WHERE u.status = :status")
+@Query("FROM User u WHERE u.status = :status")
 List<User> findByStatus(@Param("status") String status);
 
 // SQL Natif - pour des cas spécifiques
@@ -209,25 +209,21 @@ public class UserService {
 ❌ MAUVAIS - Génère N+1 requêtes
 
 ```java
-
-@OneToMany(mappedBy = "user") // Lazy
-private List<Order> orders;
+@Entity
+class User {
+    @OneToMany(mappedBy = "user") // Lazy
+    private List<Order> orders;
+}
 
 List<User> users = userRepository.findAll();
-for(
-User user :users){
-        user.
-
-getOrders().
-
-size(); // Requête SQL pour chaque user !
+for (User user :users) {
+    user.getOrders().size(); // Requête SQL pour chaque user !
 }
 ```
 
 ✅ BON - Une seule requête avec JOIN FETCH
 
 ```java
-
 @Query("SELECT u FROM User u LEFT JOIN FETCH u.orders")
 List<User> findAllWithOrders();
 ```
